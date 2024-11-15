@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:latest
+    container_name: redis-practice
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-config:/usr/local/etc/redis
+    command: redis-server /usr/local/etc/redis/redis.conf
