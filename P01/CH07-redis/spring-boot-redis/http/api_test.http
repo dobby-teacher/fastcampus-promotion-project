@@ -1,0 +1,38 @@
+### Redis API Tests
+
+### 사용자 생성
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "id": 1,
+  "username": "testUser",
+  "email": "test@example.com"
+}
+
+### 점수 등록
+POST http://localhost:8080/api/leaderboard/scores?userId=user1&score=100
+Content-Type: application/json
+
+### 상위 플레이어 조회
+GET http://localhost:8080/api/leaderboard/top/10
+
+### 여러 사용자 생성
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "id": 2,
+  "username": "testUser2",
+  "email": "test2@example.com"
+}
+
+### 특정 사용자 조회
+GET http://localhost:8080/api/users/1
+
+### 여러 점수 등록
+POST http://localhost:8080/api/leaderboard/scores?userId=user2&score=150
+Content-Type: application/json
+
+### 특정 사용자의 순위 조회
+GET http://localhost:8080/api/leaderboard/rank/user1
