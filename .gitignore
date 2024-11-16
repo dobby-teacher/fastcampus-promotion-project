@@ -1,1 +1,5 @@
 .DS_Store
+*.index
+*.log
+*.metadata
+data
