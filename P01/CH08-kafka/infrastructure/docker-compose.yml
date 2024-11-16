@@ -13,7 +13,7 @@ services:
       # 리스너 설정
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
       KAFKA_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
       
       # KRaft 모드 설정
       KAFKA_PROCESS_ROLES: 'broker,controller'  # 브로커와 컨트롤러 역할 통합
@@ -26,3 +26,24 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     volumes:
       - ./data/kafka:/var/lib/kafka/data
+    networks:
+      - kafka_network 
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "9090:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092  # 'localhost' 대신 'kafka' 사용
+      # hostname을 kafka로 인식할 수 있도록 추가 설정
+      - KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL=PLAINTEXT
+    networks:
+      - kafka_network    # 네트워크 추가
+    depends_on:
+      - kafka
+
+networks:    # 네트워크 정의 추가
+  kafka_network:
+    driver: bridge
+
