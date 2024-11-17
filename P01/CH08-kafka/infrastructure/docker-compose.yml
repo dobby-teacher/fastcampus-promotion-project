@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   kafka:
-    image: confluentinc/cp-kafka:7.5.1
+    image: confluentinc/cp-kafka:7.5.1 # Apache Kafka 3.5.x = Confluent Platform 7.5.x
     container_name: kafka
     ports:
       - "9092:9092"
@@ -27,23 +27,20 @@ services:
     volumes:
       - ./data/kafka:/var/lib/kafka/data
     networks:
-      - kafka_network 
+      - kafka_network
   kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    ports:
-      - "9090:8080"
-    environment:
-      - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092  # 'localhost' 대신 'kafka' 사용
-      # hostname을 kafka로 인식할 수 있도록 추가 설정
-      - KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL=PLAINTEXT
-    networks:
-      - kafka_network    # 네트워크 추가
-    depends_on:
-      - kafka
+      image: provectuslabs/kafka-ui:latest
+      ports:
+         - "9090:8080"
+      environment:
+         - KAFKA_CLUSTERS_0_NAME=local
+         - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      networks:
+         - kafka_network    # 네트워크 추가
+      depends_on:
+         - kafka
 
 networks:    # 네트워크 정의 추가
-  kafka_network:
-    driver: bridge
+   kafka_network:
+      driver: bridge
 
