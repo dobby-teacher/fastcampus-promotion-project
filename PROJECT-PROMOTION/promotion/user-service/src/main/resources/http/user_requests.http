@@ -1,0 +1,21 @@
+### Create User 1
+POST http://localhost:8004/api/v1/users/signup
+Content-Type: application/json
+
+{
+  "name": "Fast Campus",
+  "email": "fast.campus1@example.com",
+  "password": "campus"
+}
+
+### Create User 2
+POST http://localhost:8004/api/v1/users/signup
+Content-Type: application/json
+
+{
+  "name": "Fast Campus",
+  "email": "fast.campus2@example.com",
+  "password": "campus"
+}
+
+> {% client.global.set("userId", response.body.id); %}
