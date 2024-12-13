@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>쿠폰 서비스</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="mb-4">쿠폰 서비스</h1>
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" href="/ui/coupons">쿠폰 관리</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/ui/policies">쿠폰 정책</a>
+        </li>
+    </ul>
+
+    <!-- 쿠폰 발급 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">쿠폰 발급</h5>
+        </div>
+        <div class="card-body">
+            <form id="issueForm">
+                <div class="mb-3">
+                    <label for="userId" class="form-label">사용자 ID</label>
+                    <input type="number" class="form-control" id="userId" required>
+                </div>
+                <div class="mb-3">
+                    <label for="apiVersion" class="form-label">API 버전</label>
+                    <select class="form-select" id="apiVersion" required>
+                        <option value="v1">v1</option>
+                        <option value="v2">v2</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="policyId" class="form-label">쿠폰 정책</label>
+                    <select class="form-select" id="policyId" required>
+                        <option value="">선택하세요</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">발급</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 쿠폰 사용 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">쿠폰 사용</h5>
+        </div>
+        <div class="card-body">
+            <form id="useForm">
+                <div class="mb-3">
+                    <label for="couponId" class="form-label">쿠폰 ID</label>
+                    <input type="text" class="form-control" id="couponId" required>
+                </div>
+                <div class="mb-3">
+                    <label for="orderId" class="form-label">주문 ID</label>
+                    <input type="number" class="form-control" id="orderId" required>
+                </div>
+                <button type="submit" class="btn btn-success">사용</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 쿠폰 취소 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">쿠폰 사용 취소</h5>
+        </div>
+        <div class="card-body">
+            <form id="cancelForm">
+                <div class="mb-3">
+                    <label for="cancelCouponId" class="form-label">쿠폰 ID</label>
+                    <input type="text" class="form-control" id="cancelCouponId" required>
+                </div>
+                <button type="submit" class="btn btn-danger">취소</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 결과 표시 영역 -->
+    <div id="result" class="result"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    let currentApiVersion = 'v2';
+
+    function showResult(message, isSuccess) {
+        const resultDiv = $('#result');
+        resultDiv.removeClass('success error').addClass(isSuccess ? 'success' : 'error');
+        resultDiv.text(message).show();
+        setTimeout(() => resultDiv.fadeOut(), 5000);
+    }
+
+    function loadPolicies() {
+        fetch(`/api/v1/coupon-policies`)
+            .then(response => response.json())
+            .then(policies => {
+                const select = $('#policyId');
+                select.empty().append('<option value="">선택하세요</option>');
+                policies.forEach(policy => {
+                    select.append(`<option value="${policy.id}">${policy.name} (${policy.discountValue}원 할인)</option>`);
+                });
+            })
+            .catch(error => {
+                showResult('쿠폰 정책 목록을 불러오는데 실패했습니다: ' + error.message, false);
+            });
+    }
+
+    function handleApiResponse(response) {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(text);
+            });
+        }
+        return response.json();
+    }
+
+    $(document).ready(function () {
+        loadPolicies();
+
+        $('#apiVersion').on('change', function () {
+            currentApiVersion = $(this).val();
+            loadPolicies();
+        });
+
+        $('#issueForm').on('submit', function (e) {
+            e.preventDefault();
+            fetch(`/api/${currentApiVersion}/coupons/issue`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: parseInt($('#userId').val()),
+                    couponPolicyId: parseInt($('#policyId').val())
+                })
+            })
+                .then(handleApiResponse)
+                .then(data => {
+                    showResult(`쿠폰이 발급되었습니다. (쿠폰 ID: ${data.couponId})`, true);
+                    $('#issueForm')[0].reset();
+                })
+                .catch(error => {
+                    showResult('쿠폰 발급에 실패했습니다: ' + error.message, false);
+                });
+        });
+
+        $('#useForm').on('submit', function (e) {
+            e.preventDefault();
+            const couponId = $('#couponId').val();
+            const orderId = parseInt($('#orderId').val());
+            const url = `/api/v2/coupons/${encodeURIComponent(couponId)}/use`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({orderId})
+            })
+                .then(handleApiResponse)
+                .then(data => {
+                    showResult('쿠폰이 사용되었습니다.', true);
+                    $('#useForm')[0].reset();
+                })
+                .catch(error => {
+                    showResult('쿠폰 사용에 실패했습니다: ' + error.message, false);
+                });
+        });
+
+        $('#cancelForm').on('submit', function (e) {
+            e.preventDefault();
+            const couponId = $('#cancelCouponId').val();
+            fetch(`/api/v2/coupons/${encodeURIComponent(couponId)}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(handleApiResponse)
+                .then(data => {
+                    showResult('쿠폰 사용이 취소되었습니다.', true);
+                    $('#cancelForm')[0].reset();
+                })
+                .catch(error => {
+                    showResult('쿠폰 취소에 실패했습니다: ' + error.message, false);
+                });
+        });
+    });
+</script>
+</body>
+</html>

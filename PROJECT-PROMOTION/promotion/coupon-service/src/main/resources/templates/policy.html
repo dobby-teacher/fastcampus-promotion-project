@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>쿠폰 정책 관리</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="mb-4">쿠폰 정책 관리</h1>
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" href="/ui/coupons">쿠폰 관리</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="/ui/policies">쿠폰 정책</a>
+        </li>
+    </ul>
+
+    <!-- 쿠폰 정책 등록 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">쿠폰 정책 등록</h5>
+        </div>
+        <div class="card-body">
+            <form id="policyForm">
+                <div class="mb-3">
+                    <label for="name" class="form-label">정책 이름</label>
+                    <input type="text" class="form-control" id="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="discountType" class="form-label">할인 유형</label>
+                    <select class="form-select" id="discountType" required>
+                        <option value="FIXED_AMOUNT">정액 할인</option>
+                        <option value="PERCENTAGE">정률 할인</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="discountValue" class="form-label">할인 값</label>
+                    <input type="number" class="form-control" id="discountValue" required>
+                    <small class="form-text text-muted">정액 할인의 경우 원 단위, 정률 할인의 경우 % 단위</small>
+                </div>
+                <div class="mb-3">
+                    <label for="minimumOrderAmount" class="form-label">최소 주문 금액</label>
+                    <input type="number" class="form-control" id="minimumOrderAmount" required>
+                </div>
+                <div class="mb-3">
+                    <label for="maximumDiscountAmount" class="form-label">최대 할인 금액</label>
+                    <input type="number" class="form-control" id="maximumDiscountAmount" required>
+                </div>
+                <div class="mb-3">
+                    <label for="startTime" class="form-label">시작 시간</label>
+                    <input type="datetime-local" class="form-control" id="startTime" required>
+                </div>
+                <div class="mb-3">
+                    <label for="endTime" class="form-label">종료 시간</label>
+                    <input type="datetime-local" class="form-control" id="endTime" required>
+                </div>
+                <div class="mb-3">
+                    <label for="validityPeriod" class="form-label">유효 기간 (일)</label>
+                    <input type="number" class="form-control" id="validityPeriod" required>
+                </div>
+                <button type="submit" class="btn btn-primary">등록</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 등록된 쿠폰 정책 목록 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">쿠폰 정책 목록</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>이름</th>
+                        <th>할인 유형</th>
+                        <th>할인 값</th>
+                        <th>최소 주문 금액</th>
+                        <th>최대 할인 금액</th>
+                        <th>발행 수량</th>
+                        <th>사용 기간</th>
+                    </tr>
+                    </thead>
+                    <tbody id="policyList">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="result" class="result"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function showResult(message, isSuccess) {
+        const resultDiv = $('#result');
+        resultDiv.removeClass('success error').addClass(isSuccess ? 'success' : 'error');
+        resultDiv.text(message).show();
+        setTimeout(() => resultDiv.hide(), 3000);
+    }
+
+    function loadPolicies() {
+        fetch('/api/v1/coupon-policies')
+            .then(response => response.json())
+            .then(policies => {
+                const tbody = $('#policyList');
+                tbody.empty();
+                policies.forEach(policy => {
+                    tbody.append(`
+                            <tr>
+                                <td>${policy.id}</td>
+                                <td>${policy.name}</td>
+                                <td>${policy.discountType}</td>
+                                <td>${policy.discountValue}</td>
+                                <td>${policy.minimumOrderAmount}</td>
+                                <td>${policy.maximumDiscountAmount}</td>
+                                <td>${policy.totalQuantity}</td>
+                                <td>${new Date(policy.startTime).toLocaleString()} ~ ${new Date(policy.endTime).toLocaleString()}</td>
+                            </tr>
+                        `);
+                });
+            });
+    }
+
+    $(document).ready(function () {
+        loadPolicies();
+
+        $('#policyForm').on('submit', function (e) {
+            e.preventDefault();
+            const policy = {
+                name: $('#name').val(),
+                discountType: $('#discountType').val(),
+                discountValue: parseInt($('#discountValue').val()),
+                minimumOrderAmount: parseInt($('#minimumOrderAmount').val()),
+                maximumDiscountAmount: parseInt($('#maximumDiscountAmount').val()),
+                totalQuantity: 1000,
+                startTime: new Date($('#startTime').val()).toISOString(),
+                endTime: new Date($('#endTime').val()).toISOString()
+            };
+
+            fetch('/api/v1/coupon-policies', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(policy)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    showResult('쿠폰 정책이 성공적으로 등록되었습니다.', true);
+                    $('#policyForm')[0].reset();
+                    loadPolicies();
+                })
+                .catch(error => {
+                    showResult('쿠폰 정책 등록에 실패했습니다: ' + error.message, false);
+                });
+        });
+    });
+</script>
+</body>
+</html>
