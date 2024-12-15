@@ -58,6 +58,13 @@
         <div class="card-body">
             <form id="policyForm">
                 <div class="mb-3">
+                    <label for="apiVersion" class="form-label">API 버전</label>
+                    <select class="form-select" id="apiVersion" required>
+                        <option value="v1">v1</option>
+                        <option value="v2">v2</option>
+                    </select>
+                </div>
+                <div class="mb-3">
                     <label for="name" class="form-label">정책 이름</label>
                     <input type="text" class="form-control" id="name" required>
                 </div>
@@ -92,6 +99,10 @@
                 <div class="mb-3">
                     <label for="validityPeriod" class="form-label">유효 기간 (일)</label>
                     <input type="number" class="form-control" id="validityPeriod" required>
+                </div>
+                <div class="mb-3">
+                    <label for="totalQuantity" class="form-label">발급 수량</label>
+                    <input type="number" class="form-control" id="totalQuantity" required>
                 </div>
                 <button type="submit" class="btn btn-primary">등록</button>
             </form>
@@ -130,6 +141,8 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    let currentApiVersion = 'v2';
+
     function showResult(message, isSuccess) {
         const resultDiv = $('#result');
         resultDiv.removeClass('success error').addClass(isSuccess ? 'success' : 'error');
@@ -138,7 +151,7 @@
     }
 
     function loadPolicies() {
-        fetch('/api/v1/coupon-policies')
+        fetch('/api/' + currentApiVersion + '/coupon-policies')
             .then(response => response.json())
             .then(policies => {
                 const tbody = $('#policyList');
@@ -163,6 +176,11 @@
     $(document).ready(function () {
         loadPolicies();
 
+        $('#apiVersion').on('change', function () {
+            currentApiVersion = $(this).val();
+            loadPolicies();
+        });
+
         $('#policyForm').on('submit', function (e) {
             e.preventDefault();
             const policy = {
@@ -171,12 +189,12 @@
                 discountValue: parseInt($('#discountValue').val()),
                 minimumOrderAmount: parseInt($('#minimumOrderAmount').val()),
                 maximumDiscountAmount: parseInt($('#maximumDiscountAmount').val()),
-                totalQuantity: 1000,
+                totalQuantity: parseInt($('#totalQuantity').val()),
                 startTime: new Date($('#startTime').val()).toISOString(),
                 endTime: new Date($('#endTime').val()).toISOString()
             };
 
-            fetch('/api/v1/coupon-policies', {
+            fetch('/api/' + currentApiVersion + '/coupon-policies', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

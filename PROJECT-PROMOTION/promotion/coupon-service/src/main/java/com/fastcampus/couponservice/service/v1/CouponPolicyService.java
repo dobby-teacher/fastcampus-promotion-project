@@ -18,24 +18,19 @@ public class CouponPolicyService {
     private final CouponPolicyRepository couponPolicyRepository;
 
     @Transactional
-    public CouponPolicyDto.Response createCouponPolicy(CouponPolicyDto.CreateRequest request) {
+    public CouponPolicy createCouponPolicy(CouponPolicyDto.CreateRequest request) {
         CouponPolicy couponPolicy = request.toEntity();
-        CouponPolicy savedPolicy = couponPolicyRepository.save(couponPolicy);
-
-        return CouponPolicyDto.Response.from(savedPolicy);
+        return couponPolicyRepository.save(couponPolicy);
     }
 
     @Transactional(readOnly = true)
-    public CouponPolicyDto.Response getCouponPolicy(Long id) {
-        CouponPolicy couponPolicy = couponPolicyRepository.findById(id)
+    public CouponPolicy getCouponPolicy(Long id) {
+        return couponPolicyRepository.findById(id)
                 .orElseThrow(() -> new CouponPolicyNotFoundException("쿠폰 정책을 찾을 수 없습니다."));
-        return CouponPolicyDto.Response.from(couponPolicy);
     }
 
     @Transactional(readOnly = true)
-    public List<CouponPolicyDto.Response> getAllCouponPolicies() {
-        return couponPolicyRepository.findAll().stream()
-                .map(CouponPolicyDto.Response::from)
-                .collect(Collectors.toList());
+    public List<CouponPolicy> getAllCouponPolicies() {
+        return couponPolicyRepository.findAll();
     }
 }

@@ -1,7 +1,8 @@
-package com.fastcampus.couponservice.controller.v1;
+package com.fastcampus.couponservice.controller.v2;
 
-import com.fastcampus.couponservice.dto.v1.CouponPolicyDto;
-import com.fastcampus.couponservice.service.v1.CouponPolicyService;
+import com.fastcampus.couponservice.dto.v2.CouponPolicyDto;
+import com.fastcampus.couponservice.service.v2.CouponPolicyService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,16 +10,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RestController
-@RequestMapping("/api/v1/coupon-policies")
+@RestController("couponPolicyControllerV2")
+@RequestMapping("/api/v2/coupon-policies")
 @RequiredArgsConstructor
 public class CouponPolicyController {
 
     private final CouponPolicyService couponPolicyService;
 
     @PostMapping
-    public ResponseEntity<CouponPolicyDto.Response> createCouponPolicy(
-            @RequestBody CouponPolicyDto.CreateRequest request) {
+    public ResponseEntity<CouponPolicyDto.Response> createCouponPolicy(@RequestBody CouponPolicyDto.CreateRequest request) throws JsonProcessingException {
         return ResponseEntity.ok()
                 .body(CouponPolicyDto.Response.from(couponPolicyService.createCouponPolicy(request)));
     }

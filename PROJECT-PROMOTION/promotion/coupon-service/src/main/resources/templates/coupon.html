@@ -131,7 +131,7 @@
     }
 
     function loadPolicies() {
-        fetch(`/api/v1/coupon-policies`)
+        fetch(`/api/${currentApiVersion}/coupon-policies`)
             .then(response => response.json())
             .then(policies => {
                 const select = $('#policyId');
@@ -167,10 +167,10 @@
             fetch(`/api/${currentApiVersion}/coupons/issue`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-USER-ID' : parseInt($('#userId').val())
                 },
                 body: JSON.stringify({
-                    userId: parseInt($('#userId').val()),
                     couponPolicyId: parseInt($('#policyId').val())
                 })
             })
@@ -193,7 +193,8 @@
             fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-USER-ID' : parseInt($('#userId').val())
                 },
                 body: JSON.stringify({orderId})
             })
@@ -213,7 +214,8 @@
             fetch(`/api/v2/coupons/${encodeURIComponent(couponId)}/cancel`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-USER-ID' : parseInt($('#userId').val())
                 }
             })
                 .then(handleApiResponse)
