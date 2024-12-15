@@ -20,19 +20,19 @@ public class CouponController {
     @PostMapping
     public ResponseEntity<CouponDto.Response> issueCoupon(@RequestBody CouponDto.IssueRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(couponService.issueCoupon(request));
+                .body(CouponDto.Response.from(couponService.issueCoupon(request)));
     }
 
     @PostMapping("/{couponId}/use")
     public ResponseEntity<CouponDto.Response> useCoupon(
             @PathVariable Long couponId,
             @RequestBody CouponDto.UseRequest request) {
-        return ResponseEntity.ok(couponService.useCoupon(couponId, request.getOrderId()));
+        return ResponseEntity.ok(CouponDto.Response.from(couponService.useCoupon(couponId, request.getOrderId())));
     }
 
     @PostMapping("/{couponId}/cancel")
     public ResponseEntity<CouponDto.Response> cancelCoupon(@PathVariable Long couponId) {
-        return ResponseEntity.ok(couponService.cancelCoupon(couponId));
+        return ResponseEntity.ok(CouponDto.Response.from(couponService.cancelCoupon(couponId)));
     }
 
     @GetMapping

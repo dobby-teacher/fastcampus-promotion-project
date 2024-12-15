@@ -34,7 +34,7 @@ public class CouponRedisService {
     private static final long LOCK_LEASE_TIME = 5;
     
     @Transactional
-    public CouponDto.Response issueCoupon(CouponDto.IssueRequest request) {
+    public Coupon issueCoupon(CouponDto.IssueRequest request) {
         String quantityKey = COUPON_QUANTITY_KEY + request.getCouponPolicyId();
         String lockKey = COUPON_LOCK_KEY + request.getCouponPolicyId();
         RLock lock = redissonClient.getLock(lockKey);
@@ -62,13 +62,11 @@ public class CouponRedisService {
             }
             
             // 쿠폰 발급
-            Coupon coupon = couponRepository.save(Coupon.builder()
+            return couponRepository.save(Coupon.builder()
                     .couponPolicy(couponPolicy)
                     .userId(UserIdInterceptor.getCurrentUserId())
                     .couponCode(generateCouponCode())
                     .build());
-            
-            return CouponDto.Response.from(coupon);
             
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

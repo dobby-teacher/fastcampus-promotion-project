@@ -77,7 +77,7 @@ class CouponServiceTest {
                 .couponPolicyId(1L)
                 .build();
 
-        when(couponPolicyRepository.findById(any())).thenReturn(Optional.of(couponPolicy));
+        when(couponPolicyRepository.findByIdWithLock(any())).thenReturn(Optional.of(couponPolicy));
         when(couponRepository.countByCouponPolicyId(any())).thenReturn(0L);
         when(couponRepository.save(any())).thenReturn(coupon);
 
@@ -85,7 +85,7 @@ class CouponServiceTest {
             mockedStatic.when(UserIdInterceptor::getCurrentUserId).thenReturn(TEST_USER_ID);
 
             // When
-            CouponDto.Response response = couponService.issueCoupon(request);
+            CouponDto.Response response = CouponDto.Response.from(couponService.issueCoupon(request));
 
             // Then
             assertThat(response.getId()).isEqualTo(TEST_COUPON_ID);
@@ -105,7 +105,7 @@ class CouponServiceTest {
             mockedStatic.when(UserIdInterceptor::getCurrentUserId).thenReturn(TEST_USER_ID);
 
             // When
-            CouponDto.Response response = couponService.useCoupon(TEST_COUPON_ID, TEST_ORDER_ID);
+            CouponDto.Response response = CouponDto.Response.from(couponService.useCoupon(TEST_COUPON_ID, TEST_ORDER_ID));
 
             // Then
             assertThat(response.getId()).isEqualTo(TEST_COUPON_ID);
@@ -143,7 +143,7 @@ class CouponServiceTest {
             mockedStatic.when(UserIdInterceptor::getCurrentUserId).thenReturn(TEST_USER_ID);
 
             // When
-            CouponDto.Response response = couponService.cancelCoupon(TEST_COUPON_ID);
+            CouponDto.Response response = CouponDto.Response.from(couponService.cancelCoupon(TEST_COUPON_ID));
 
             // Then
             assertThat(response.getId()).isEqualTo(TEST_COUPON_ID);
@@ -178,7 +178,7 @@ class CouponServiceTest {
                 eq(TEST_USER_ID), any(), any(PageRequest.class))).thenReturn(couponPage);
 
         CouponDto.ListRequest request = CouponDto.ListRequest.builder()
-                .status("AVAILABLE")
+                .status(Coupon.Status.AVAILABLE)
                 .page(0)
                 .size(10)
                 .build();

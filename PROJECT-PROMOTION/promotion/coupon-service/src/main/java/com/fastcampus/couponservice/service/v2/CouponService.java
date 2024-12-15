@@ -18,10 +18,10 @@ public class CouponService {
     
     @Transactional
     public CouponDto.Response issueCoupon(CouponDto.IssueRequest request) {
-        CouponDto.Response response = couponRedisService.issueCoupon(request);
-        couponStateService.updateCouponState(couponRepository.findById(response.getId())
+        Coupon coupon = couponRedisService.issueCoupon(request);
+        couponStateService.updateCouponState(couponRepository.findById(coupon.getId())
                 .orElseThrow(() -> new CouponNotFoundException("쿠폰을 찾을 수 없습니다.")));
-        return response;
+        return CouponDto.Response.from(coupon);
     }
     
     @Transactional

@@ -48,7 +48,7 @@ public class CouponService {
      * DB 레벨의 락만으로는 정확한 수량 제어가 어려움
      */
     @Transactional
-    public CouponDto.Response issueCoupon(CouponDto.IssueRequest request) {
+    public Coupon issueCoupon(CouponDto.IssueRequest request) {
         CouponPolicy couponPolicy = couponPolicyRepository.findByIdWithLock(request.getCouponPolicyId())
                 .orElseThrow(() -> new CouponIssueException("쿠폰 정책을 찾을 수 없습니다."));
 
@@ -68,11 +68,11 @@ public class CouponService {
                 .couponCode(generateCouponCode())
                 .build();
 
-        return CouponDto.Response.from(couponRepository.save(coupon));
+        return couponRepository.save(coupon);
     }
 
     @Transactional
-    public CouponDto.Response useCoupon(Long couponId, Long orderId) {
+    public Coupon useCoupon(Long couponId, Long orderId) {
         Long currentUserId = UserIdInterceptor.getCurrentUserId();
 
         Coupon coupon = couponRepository.findByIdAndUserId(couponId, currentUserId)
@@ -80,18 +80,18 @@ public class CouponService {
 
         coupon.use(orderId);
 
-        return CouponDto.Response.from(coupon);
+        return coupon;
     }
 
     @Transactional
-    public CouponDto.Response cancelCoupon(Long couponId) {
+    public Coupon cancelCoupon(Long couponId) {
         Long currentUserId = UserIdInterceptor.getCurrentUserId();
 
         Coupon coupon = couponRepository.findByIdAndUserId(couponId, currentUserId)
                 .orElseThrow(() -> new CouponNotFoundException("쿠폰을 찾을 수 없거나 접근 권한이 없습니다."));
 
         coupon.cancel();
-        return CouponDto.Response.from(coupon);
+        return coupon;
     }
 
     @Transactional(readOnly = true)
