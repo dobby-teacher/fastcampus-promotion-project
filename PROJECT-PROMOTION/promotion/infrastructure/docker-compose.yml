@@ -8,6 +8,8 @@ services:
     volumes:
       - ./redis-config:/usr/local/etc/redis
     command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - promotion_network
   kafka:
     image: confluentinc/cp-kafka:7.5.1 # Apache Kafka 3.5.x = Confluent Platform 7.5.x
     container_name: kafka
@@ -21,7 +23,7 @@ services:
       # 리스너 설정
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
       KAFKA_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9092'
 
       # KRaft 모드 설정
       KAFKA_PROCESS_ROLES: 'broker,controller'  # 브로커와 컨트롤러 역할 통합
@@ -47,6 +49,7 @@ services:
       - promotion_network    # 네트워크 추가
     depends_on:
       - kafka
-networks:    # 네트워크 정의 추가
+
+networks: # 네트워크 정의 추가
   promotion_network:
-    driver: bridge
+    driver: host
