@@ -62,6 +62,7 @@
                     <select class="form-select" id="apiVersion" required>
                         <option value="v1">v1</option>
                         <option value="v2">v2</option>
+                        <option value="v3">v3</option>
                     </select>
                 </div>
                 <div class="mb-3">
@@ -141,7 +142,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    let currentApiVersion = 'v2';
+    let currentApiVersion = 'v1';
 
     function showResult(message, isSuccess) {
         const resultDiv = $('#result');

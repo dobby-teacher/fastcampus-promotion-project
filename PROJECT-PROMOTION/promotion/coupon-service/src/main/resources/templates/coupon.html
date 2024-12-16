@@ -122,7 +122,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    let currentApiVersion = 'v2';
+    let currentApiVersion = 'v1';
 
     function showResult(message, isSuccess) {
         const resultDiv = $('#result');
@@ -189,7 +189,7 @@
             e.preventDefault();
             const couponId = $('#couponId').val();
             const orderId = parseInt($('#orderId').val());
-            const url = `/api/v2/coupons/${encodeURIComponent(couponId)}/use`;
+            const url = `/api/${currentApiVersion}/coupons/${encodeURIComponent(couponId)}/use`;
 
             fetch(url, {
                 method: 'POST',
@@ -212,7 +212,7 @@
         $('#cancelForm').on('submit', function (e) {
             e.preventDefault();
             const couponId = $('#cancelCouponId').val();
-            fetch(`/api/v2/coupons/${encodeURIComponent(couponId)}/cancel`, {
+            fetch(`/api/${currentApiVersion}/coupons/${encodeURIComponent(couponId)}/cancel`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
