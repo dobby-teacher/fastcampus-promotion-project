@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point Service Test Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+        .history-table {
+            margin-top: 30px;
+        }
+        .version-selector {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="mb-4">Point Service Test</h2>
+        
+        <!-- Version Selector -->
+        <div class="version-selector">
+            <label for="apiVersion" class="form-label">API Version</label>
+            <select class="form-select" id="apiVersion" onchange="updateApiVersion()">
+                <option value="v1">Version 1 (DB)</option>
+                <option value="v2">Version 2 (Redis)</option>
+            </select>
+        </div>
+        
+        <!-- User ID Input -->
+        <div class="mb-4">
+            <label for="userId" class="form-label">User ID</label>
+            <input type="number" class="form-control" id="userId" value="1">
+        </div>
+
+        <!-- Balance Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Point Balance</h5>
+                <p class="card-text" id="balanceDisplay">Balance: 0 points</p>
+                <button class="btn btn-primary" onclick="getBalance()">Check Balance</button>
+            </div>
+        </div>
+
+        <!-- Earn Points Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Earn Points</h5>
+                <div class="mb-3">
+                    <label for="earnAmount" class="form-label">Amount</label>
+                    <input type="number" class="form-control" id="earnAmount" value="1000">
+                </div>
+                <div class="mb-3">
+                    <label for="earnDescription" class="form-label">Description</label>
+                    <input type="text" class="form-control" id="earnDescription" value="Test earning points">
+                </div>
+                <button class="btn btn-success" onclick="earnPoints()">Earn Points</button>
+            </div>
+        </div>
+
+        <!-- Use Points Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Use Points</h5>
+                <div class="mb-3">
+                    <label for="useAmount" class="form-label">Amount</label>
+                    <input type="number" class="form-control" id="useAmount" value="500">
+                </div>
+                <div class="mb-3">
+                    <label for="useDescription" class="form-label">Description</label>
+                    <input type="text" class="form-control" id="useDescription" value="Test using points">
+                </div>
+                <button class="btn btn-warning" onclick="usePoints()">Use Points</button>
+            </div>
+        </div>
+
+        <!-- Point History Section -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Point History</h5>
+                <button class="btn btn-info mb-3" onclick="getPointHistory()">Get History</button>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Balance</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentApiVersion = 'v1';
+
+        function getApiBaseUrl() {
+            return `/api/${currentApiVersion}/points`;
+        }
+
+        function updateApiVersion() {
+            currentApiVersion = document.getElementById('apiVersion').value;
+            // Refresh current data
+            getBalance();
+            getPointHistory();
+        }
+
+        async function getBalance() {
+            const userId = document.getElementById('userId').value;
+            try {
+                const response = await fetch(`${getApiBaseUrl()}/users/${userId}/balance`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-USER-ID': userId
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                document.getElementById('balanceDisplay').textContent = `Balance: ${data.balance} points`;
+            } catch (error) {
+                alert('Error getting balance: ' + error.message);
+            }
+        }
+
+        async function earnPoints() {
+            const userId = document.getElementById('userId').value;
+            const amount = document.getElementById('earnAmount').value;
+            const description = document.getElementById('earnDescription').value;
+
+            try {
+                const response = await fetch(`${getApiBaseUrl()}/earn`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-USER-ID': userId
+                    },
+                    body: JSON.stringify({
+                        amount: parseInt(amount),
+                        description: description
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to earn points');
+                }
+
+                const data = await response.json();
+                alert('Points earned successfully!');
+                getBalance();
+                getPointHistory();
+            } catch (error) {
+                alert('Error earning points: ' + error.message);
+            }
+        }
+
+        async function usePoints() {
+            const userId = document.getElementById('userId').value;
+            const amount = document.getElementById('useAmount').value;
+            const description = document.getElementById('useDescription').value;
+
+            try {
+                const response = await fetch(`${getApiBaseUrl()}/use`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-USER-ID': userId
+                    },
+                    body: JSON.stringify({
+                        amount: parseInt(amount),
+                        description: description
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to use points');
+                }
+
+                const data = await response.json();
+                alert('Points used successfully!');
+                getBalance();
+                getPointHistory();
+            } catch (error) {
+                alert('Error using points: ' + error.message);
+            }
+        }
+
+        async function getPointHistory() {
+            const userId = document.getElementById('userId').value;
+            try {
+                const response = await fetch(`${getApiBaseUrl()}/users/${userId}/history`,{
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-USER-ID': userId
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                const tableBody = document.getElementById('historyTableBody');
+                tableBody.innerHTML = '';
+                
+                data.content.forEach(point => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${point.id}</td>
+                        <td>${point.type}</td>
+                        <td>${point.amount}</td>
+                        <td>${point.description}</td>
+                        <td>${point.balanceSnapshot}</td>
+                        <td>${new Date(point.createdAt).toLocaleString()}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                alert('Error getting history: ' + error.message);
+            }
+        }
+
+        // Initial balance check
+        getBalance();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
