@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:pointdb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:org/springframework/batch/core/schema-h2.sql, classpath:schema.sql
+
+  batch:
+    job:
+      enabled: false  # 테스트 시 자동 실행 방지
+    jdbc:
+      initialize-schema: never
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        
+  redis:
+    host: localhost
+    port: 6379
+
+eureka:
+  client:
+    enabled: false  # Eureka 클라이언트 비활성화

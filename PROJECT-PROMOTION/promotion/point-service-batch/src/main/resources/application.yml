@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:pointdb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        
+  batch:
+    job:
+      enabled: false  # 기본 job 실행 비활성화
+    jdbc:
+      initialize-schema: always
+      
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+logging:
+  level:
+    org.springframework.batch: DEBUG
+    com.fastcampus.pointservicebatch: DEBUG
