@@ -40,7 +40,7 @@ public class PointService {
         return pointRepository.save(point);
     }
 
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional
     public Point usePoints(Long userId, Long amount, String description) {
         PointBalance pointBalance = pointBalanceRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
