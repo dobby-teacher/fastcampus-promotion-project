@@ -85,6 +85,22 @@ services:
     restart: always
     networks:
       - promotion_network
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    privileged: true
+    user: root
+    ports:
+      - "8888:8080"  # 호스트의 8888 포트를 컨테이너의 8080 포트에 매핑
+      - "50000:50000"
+    volumes:
+      - ./jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../point-service-batch:/var/jenkins_home/workspace/point-service-batch
+    environment:
+      - TZ=Asia/Seoul
+    networks:
+      - promotion_network
 
 networks: # 네트워크 정의 추가
   promotion_network:
