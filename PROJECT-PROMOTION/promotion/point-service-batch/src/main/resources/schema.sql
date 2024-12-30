@@ -1,19 +1,8 @@
-DROP TABLE IF EXISTS point_balance;
-DROP TABLE IF EXISTS point;
-DROP TABLE IF EXISTS daily_point_report;
+DROP TABLE IF EXISTS points;
+DROP TABLE IF EXISTS point_balances;
+DROP TABLE IF EXISTS daily_point_reports;
 
-CREATE TABLE point_balance
-(
-    id         BIGINT AUTO_INCREMENT,
-    user_id    BIGINT NOT NULL,
-    balance    BIGINT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP,
-    PRIMARY KEY (id),
-    CONSTRAINT uk_point_balance_user_id UNIQUE (user_id)
-);
-
-CREATE TABLE point
+CREATE TABLE points
 (
     id               BIGINT AUTO_INCREMENT,
     user_id          BIGINT      NOT NULL,
@@ -26,7 +15,18 @@ CREATE TABLE point
     PRIMARY KEY (id)
 );
 
-CREATE TABLE daily_point_report
+CREATE TABLE point_balances
+(
+    id         BIGINT AUTO_INCREMENT,
+    user_id    BIGINT NOT NULL,
+    balance    BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_point_balance_user_id UNIQUE (user_id)
+);
+
+CREATE TABLE daily_point_reports
 (
     id            BIGINT AUTO_INCREMENT,
     user_id       BIGINT NOT NULL,

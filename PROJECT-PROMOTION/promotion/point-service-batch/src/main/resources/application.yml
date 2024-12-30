@@ -4,6 +4,11 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:org/springframework/batch/core/schema-h2.sql, classpath:schema.sql
   
   jpa:
     hibernate:
@@ -17,7 +22,7 @@ spring:
     job:
       enabled: false  # 기본 job 실행 비활성화
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
       
   data:
     redis:
