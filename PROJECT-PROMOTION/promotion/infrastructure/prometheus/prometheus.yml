@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "/etc/prometheus/rules/*.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9091']
+
+  - job_name: 'coupon-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['docker.for.mac.localhost:8080']
+      
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # alertmanager:9093 # 추후 AlertManager 추가 시 주석 해제

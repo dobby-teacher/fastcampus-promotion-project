@@ -1,0 +1,56 @@
+groups:
+  - name: coupon_service_alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(coupon_operation_failure[5m]) / rate(coupon_operation_success[5m]) * 100 > 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: High error rate in coupon operations
+          description: Error rate is {{ $value }}% for the last 5 minutes
+
+      - alert: SlowResponseTime
+        expr: histogram_quantile(0.95, rate(coupon_operation_duration_seconds_bucket[5m])) > 0.5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: Slow response time in coupon operations
+          description: 95th percentile response time is {{ $value }}s
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes{job="coupon-service"} > 1.5e9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage in coupon service
+          description: Memory usage is {{ $value | humanize }}B
+
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_usage{job="coupon-service"}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High CPU usage in coupon service
+          description: CPU usage is {{ $value }}%
+
+      - alert: HighGCTime
+        expr: rate(jvm_gc_pause_seconds_sum[5m]) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: High GC time in coupon service
+          description: GC is taking {{ $value }}s per second on average
+
+      - alert: ServiceDown
+        expr: up{job="coupon-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Coupon service is down
+          description: Service has been down for more than 1 minute

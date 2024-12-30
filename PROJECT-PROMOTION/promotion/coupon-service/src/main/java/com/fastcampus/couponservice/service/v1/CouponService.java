@@ -1,5 +1,6 @@
 package com.fastcampus.couponservice.service.v1;
 
+import com.fastcampus.couponservice.aop.CouponMetered;
 import com.fastcampus.couponservice.config.UserIdInterceptor;
 import com.fastcampus.couponservice.domain.Coupon;
 import com.fastcampus.couponservice.domain.CouponPolicy;
@@ -48,6 +49,7 @@ public class CouponService {
      * DB 레벨의 락만으로는 정확한 수량 제어가 어려움
      */
     @Transactional
+    @CouponMetered(version = "v1")
     public Coupon issueCoupon(CouponDto.IssueRequest request) {
         CouponPolicy couponPolicy = couponPolicyRepository.findByIdWithLock(request.getCouponPolicyId())
                 .orElseThrow(() -> new CouponIssueException("쿠폰 정책을 찾을 수 없습니다."));

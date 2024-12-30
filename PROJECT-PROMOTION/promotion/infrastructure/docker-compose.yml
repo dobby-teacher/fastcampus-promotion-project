@@ -41,7 +41,7 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     ports:
-      - "9090:8080"
+      - "9090:9090"
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
@@ -49,7 +49,47 @@ services:
       - promotion_network    # 네트워크 추가
     depends_on:
       - kafka
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/rules:/etc/prometheus/rules
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.listen-address=:9091'
+    ports:
+      - "9091:9091"
+    restart: always
+    networks:
+      - promotion_network
+
+  grafana:
+    image: grafana/grafana:10.0.3
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    restart: always
+    networks:
+      - promotion_network
 
 networks: # 네트워크 정의 추가
   promotion_network:
-    driver: host
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:

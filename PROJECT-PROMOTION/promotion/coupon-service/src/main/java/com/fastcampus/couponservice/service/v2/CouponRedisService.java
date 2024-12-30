@@ -1,5 +1,6 @@
 package com.fastcampus.couponservice.service.v2;
 
+import com.fastcampus.couponservice.aop.CouponMetered;
 import com.fastcampus.couponservice.config.UserIdInterceptor;
 import com.fastcampus.couponservice.domain.Coupon;
 import com.fastcampus.couponservice.domain.CouponPolicy;
@@ -34,6 +35,7 @@ public class CouponRedisService {
     private static final long LOCK_LEASE_TIME = 5;
     
     @Transactional
+    @CouponMetered(version = "v2")
     public Coupon issueCoupon(CouponDto.IssueRequest request) {
         String quantityKey = COUPON_QUANTITY_KEY + request.getCouponPolicyId();
         String lockKey = COUPON_LOCK_KEY + request.getCouponPolicyId();

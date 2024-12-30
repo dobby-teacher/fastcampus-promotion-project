@@ -1,5 +1,6 @@
 package com.fastcampus.couponservice.service.v3;
 
+import com.fastcampus.couponservice.aop.CouponMetered;
 import com.fastcampus.couponservice.config.UserIdInterceptor;
 import com.fastcampus.couponservice.domain.Coupon;
 import com.fastcampus.couponservice.domain.CouponPolicy;
@@ -37,6 +38,7 @@ public class CouponService {
     private final CouponPolicyService couponPolicyService;
 
     @Transactional(readOnly = true)
+    @CouponMetered(version = "v3")
     public void requestCouponIssue(CouponDto.IssueRequest request) {
         String quantityKey = COUPON_QUANTITY_KEY + request.getCouponPolicyId();
         String lockKey = COUPON_LOCK_KEY + request.getCouponPolicyId();
