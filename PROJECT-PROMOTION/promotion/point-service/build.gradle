@@ -48,6 +48,9 @@ dependencies {
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
     
     // Test dependencies
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

@@ -1,0 +1,29 @@
+groups:
+  - name: point_service_alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(point_operation_failure_total[5m]) / rate(point_operation_success_total[5m]) * 100 > 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: High error rate in point operations
+          description: Error rate is {{ $value }}%
+
+      - alert: SlowResponseTime
+        expr: histogram_quantile(0.95, rate(point_operation_duration_seconds_bucket[5m])) > 0.5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: Slow response time in point service
+          description: 95th percentile response time is {{ $value }}s
+
+      - alert: HighMemoryUsage
+        expr: sum(jvm_memory_used_bytes{area="heap"}) / sum(jvm_memory_max_bytes{area="heap"}) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage
+          description: Memory usage is {{ $value }}%
