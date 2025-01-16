@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: time-sale-service
+  
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  
+  datasource:
+    url: jdbc:h2:mem:timesaledb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # Redis 설정
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # 에러 메시지 상세 표시 설정 추가
+  mvc:
+    log-resolved-exception: true
+  
+server:
+  port: 8083
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

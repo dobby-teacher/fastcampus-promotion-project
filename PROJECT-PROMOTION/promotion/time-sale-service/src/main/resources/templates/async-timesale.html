@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Async Time Sale Service</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Async Time Sale Service (v3)</h2>
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link" href="/ui/product">Product</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/ui/time-sale">Time Sale (V1/V2)</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="/ui/async-time-sale">Time Sale (Async)</a>
+        </li>
+    </ul>
+    <div class="mb-3">
+        <h3>Create Time Sale</h3>
+        <form id="createForm">
+            <div class="mb-3">
+                <label for="productId" class="form-label">Product ID</label>
+                <input type="number" class="form-control" id="productId" required>
+            </div>
+            <div class="mb-3">
+                <label for="quantity" class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="quantity" required>
+            </div>
+            <div class="mb-3">
+                <label for="discountPrice" class="form-label">Discount Price</label>
+                <input type="number" class="form-control" id="discountPrice" required>
+            </div>
+            <div class="mb-3">
+                <label for="startAt" class="form-label">Start Time</label>
+                <input type="datetime-local" class="form-control" id="startAt" required>
+            </div>
+            <div class="mb-3">
+                <label for="endAt" class="form-label">End Time</label>
+                <input type="datetime-local" class="form-control" id="endAt" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+
+    <div class="mb-3">
+        <h3>Purchase Time Sale</h3>
+        <form id="purchaseForm">
+            <div class="mb-3">
+                <label for="timeSaleId" class="form-label">Time Sale ID</label>
+                <input type="number" class="form-control" id="timeSaleId" required>
+            </div>
+            <div class="mb-3">
+                <label for="userId" class="form-label">User ID</label>
+                <input type="number" class="form-control" id="userId" required>
+            </div>
+            <div class="mb-3">
+                <label for="purchaseQuantity" class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="purchaseQuantity" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Purchase</button>
+        </form>
+    </div>
+
+    <div class="mb-3">
+        <h3>Check Purchase Status</h3>
+        <form id="statusForm">
+            <div class="mb-3">
+                <label for="checkTimeSaleId" class="form-label">Time Sale ID</label>
+                <input type="number" class="form-control" id="checkTimeSaleId" required>
+            </div>
+            <div class="mb-3">
+                <label for="requestId" class="form-label">Request ID</label>
+                <input type="text" class="form-control" id="requestId" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Check Status</button>
+        </form>
+        <div id="statusResult" class="mt-3"></div>
+    </div>
+
+    <div class="mb-3">
+        <h3>Time Sales List</h3>
+        <button id="refreshList" class="btn btn-secondary mb-3">Refresh List</button>
+        <div id="timeSalesList"></div>
+    </div>
+</div>
+
+<script>
+    const BASE_URL = '/api/v3';
+    const createForm = document.getElementById('createForm');
+    const purchaseForm = document.getElementById('purchaseForm');
+    const statusForm = document.getElementById('statusForm');
+    const refreshButton = document.getElementById('refreshList');
+    const timeSalesList = document.getElementById('timeSalesList');
+    const statusResult = document.getElementById('statusResult');
+
+    createForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(BASE_URL + '/time-sales', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    productId: parseInt(document.getElementById('productId').value),
+                    quantity: parseInt(document.getElementById('quantity').value),
+                    discountPrice: parseInt(document.getElementById('discountPrice').value),
+                    startAt: document.getElementById('startAt').value,
+                    endAt: document.getElementById('endAt').value
+                })
+            });
+            const result = await response.json();
+            alert('Time Sale created successfully! ID: ' + result.id);
+            loadTimeSales();
+        } catch (error) {
+            alert('Error creating time sale: ' + error);
+        }
+    });
+
+    purchaseForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(BASE_URL + '/time-sales/' + document.getElementById('timeSaleId').value + '/purchase', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: parseInt(document.getElementById('userId').value),
+                    quantity: parseInt(document.getElementById('purchaseQuantity').value)
+                })
+            });
+            const result = await response.json();
+            alert('Purchase request submitted! Request ID: ' + result.requestId);
+            document.getElementById('checkTimeSaleId').value = document.getElementById('timeSaleId').value;
+            document.getElementById('requestId').value = result.requestId;
+        } catch (error) {
+            alert('Error purchasing: ' + error);
+        }
+    });
+
+    statusForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const timeSaleId = document.getElementById('checkTimeSaleId').value;
+        const requestId = document.getElementById('requestId').value;
+        
+        try {
+            const response = await fetch(BASE_URL + '/time-sales/purchase/result/' + timeSaleId + '/' + requestId);
+            const result = await response.json();
+            
+            let statusHtml = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Purchase Status</h5>
+                        <p class="card-text">
+                            Status: ${result.status}<br>
+                            ${result.queuePosition ? 'Queue Position: ' + result.queuePosition + '<br>' : ''}
+                            ${result.totalWaiting ? 'Total Waiting: ' + result.totalWaiting : ''}
+                        </p>
+                    </div>
+                </div>
+            `;
+            statusResult.innerHTML = statusHtml;
+
+            if (result.status === 'PENDING') {
+                setTimeout(() => statusForm.dispatchEvent(new Event('submit')), 1000);
+            }
+        } catch (error) {
+            console.error('Error checking status:', error);
+        }
+    });
+
+    async function loadTimeSales() {
+        try {
+            const response = await fetch(BASE_URL + '/time-sales');
+            const data = await response.json();
+            const timeSales = data.content;
+            timeSalesList.innerHTML = timeSales.map(ts => `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Time Sale ID: ${ts.id}</h5>
+                        <p class="card-text">
+                            Product: ${ts.productName}<br>
+                            Price: ${ts.price}<br>
+                            Discount Price: ${ts.discountPrice}<br>
+                            Remaining Quantity: ${ts.remainingQuantity}/${ts.quantity}<br>
+                            Status: ${ts.status}<br>
+                            Start: ${ts.startAt}<br>
+                            End: ${ts.endAt}
+                        </p>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading time sales:', error);
+        }
+    }
+
+    refreshButton.addEventListener('click', loadTimeSales);
+
+    // Initial load
+    loadTimeSales();
+</script>
+</body>
+</html>
