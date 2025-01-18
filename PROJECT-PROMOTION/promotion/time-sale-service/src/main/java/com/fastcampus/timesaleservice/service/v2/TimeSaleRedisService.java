@@ -1,5 +1,6 @@
 package com.fastcampus.timesaleservice.service.v2;
 
+import com.fastcampus.timesaleservice.aop.TimeSaleMetered;
 import com.fastcampus.timesaleservice.domain.Product;
 import com.fastcampus.timesaleservice.domain.TimeSale;
 import com.fastcampus.timesaleservice.domain.TimeSaleOrder;
@@ -74,6 +75,7 @@ public class TimeSaleRedisService {
     }
 
     @Transactional
+    @TimeSaleMetered(version = "v2")
     public TimeSale purchaseTimeSale(Long timeSaleId, TimeSaleDto.PurchaseRequest request) {
         RLock lock = redissonClient.getLock(TIME_SALE_LOCK + timeSaleId);
         if (lock == null) {

@@ -33,8 +33,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     
     // Spring Cloud
-    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.1.0'
-    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.1.0'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     
     // Database
     runtimeOnly 'com.h2database:h2'
@@ -52,6 +51,9 @@ dependencies {
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 dependencyManagement {

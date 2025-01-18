@@ -1,5 +1,6 @@
 package com.fastcampus.timesaleservice.service.v1;
 
+import com.fastcampus.timesaleservice.aop.TimeSaleMetered;
 import com.fastcampus.timesaleservice.domain.Product;
 import com.fastcampus.timesaleservice.domain.TimeSale;
 import com.fastcampus.timesaleservice.domain.TimeSaleOrder;
@@ -57,6 +58,7 @@ public class TimeSaleService {
     }
 
     @Transactional
+    @TimeSaleMetered(version = "v1")
     public TimeSale purchaseTimeSale(Long timeSaleId, TimeSaleDto.PurchaseRequest request) {
         TimeSale timeSale = timeSaleRepository.findByIdWithPessimisticLock(timeSaleId)
                 .orElseThrow(() -> new IllegalArgumentException("TimeSale not found"));

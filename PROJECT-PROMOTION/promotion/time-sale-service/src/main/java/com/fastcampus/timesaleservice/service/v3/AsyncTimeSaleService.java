@@ -1,5 +1,6 @@
 package com.fastcampus.timesaleservice.service.v3;
 
+import com.fastcampus.timesaleservice.aop.TimeSaleMetered;
 import com.fastcampus.timesaleservice.domain.TimeSale;
 import com.fastcampus.timesaleservice.dto.TimeSaleDto;
 import com.fastcampus.timesaleservice.service.v2.TimeSaleRedisService;
@@ -30,6 +31,7 @@ public class AsyncTimeSaleService {
         return timeSaleRedisService.getOngoingTimeSales(pageable);
     }
 
+    @TimeSaleMetered(version = "v3")
     public String purchaseTimeSale(Long timeSaleId, TimeSaleDto.PurchaseRequest request) {
         // 구매 요청을 Kafka로 전송하고 요청 ID를 반환
         return timeSaleProducer.sendPurchaseRequest(timeSaleId, request.getUserId(), request.getQuantity());

@@ -1,7 +1,9 @@
 spring:
   application:
     name: time-sale-service
-  
+  main:
+    allow-bean-definition-overriding: true
+
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
@@ -31,9 +33,9 @@ spring:
   # 에러 메시지 상세 표시 설정 추가
   mvc:
     log-resolved-exception: true
-  
+
 server:
-  port: 8083
+  port: 8084
 
 eureka:
   client:
@@ -46,4 +48,16 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,metrics,prometheus
+  metrics:
+    tags:
+      application: time-sale-service
+    enable:
+      redis: true
+      kafka: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms, 100ms, 200ms
+
