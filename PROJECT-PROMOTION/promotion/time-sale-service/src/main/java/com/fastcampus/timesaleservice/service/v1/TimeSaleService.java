@@ -90,17 +90,4 @@ public class TimeSaleService {
             throw new IllegalArgumentException("Discount price must be positive");
         }
     }
-
-    private void validatePurchase(TimeSale timeSale, Long quantity) {
-        if (!timeSale.isActive()) {
-            throw new IllegalStateException("Time sale is not active");
-        }
-        if (timeSale.getRemainingQuantity() < quantity) {
-            throw new IllegalStateException("Not enough quantity available");
-        }
-        LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(timeSale.getStartAt()) || now.isAfter(timeSale.getEndAt())) {
-            throw new IllegalStateException("Time sale is not in progress");
-        }
-    }
 }
