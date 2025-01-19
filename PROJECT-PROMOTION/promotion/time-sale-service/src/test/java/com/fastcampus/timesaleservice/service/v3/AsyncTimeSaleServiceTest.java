@@ -98,13 +98,13 @@ class AsyncTimeSaleServiceTest {
         Long timeSaleId = 1L;
         String requestId = "test-request-id";
         given(redissonClient.<String>getBucket(anyString())).willReturn(rBucket);
-        given(rBucket.get()).willReturn("FAILED:Out of stock");
+        given(rBucket.get()).willReturn("FAIL");
 
         // when
         TimeSaleDto.AsyncPurchaseResponse response = asyncTimeSaleService.getPurchaseResult(timeSaleId, requestId);
 
         // then
-        assertThat(response.getStatus()).isEqualTo("FAILED:Out of stock");
+        assertThat(response.getStatus()).isEqualTo("FAIL");
         assertThat(response.getQueuePosition()).isNull();
         assertThat(response.getTotalWaiting()).isEqualTo(0L);
     }

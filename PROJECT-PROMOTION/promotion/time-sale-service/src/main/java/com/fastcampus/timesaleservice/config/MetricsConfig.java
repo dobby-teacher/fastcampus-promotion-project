@@ -1,5 +1,7 @@
 package com.fastcampus.timesaleservice.config;
 
+import com.fastcampus.timesaleservice.aop.TimeSaleMetricsAspect;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.instrument.binder.kafka.KafkaClientMetrics;
@@ -19,6 +21,11 @@ import java.util.Map;
 @Configuration
 @RequiredArgsConstructor
 public class MetricsConfig {
+
+    @Bean
+    public TimeSaleMetricsAspect timeSaleMetricsAspect(MeterRegistry registry) {
+        return new TimeSaleMetricsAspect(registry);
+    }
 
     @Bean
     public MeterBinder redisMetrics(RedissonClient redissonClient) {

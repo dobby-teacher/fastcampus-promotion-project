@@ -15,16 +15,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TimeSaleRepository extends JpaRepository<TimeSale, Long> {
-    
-    @Query("SELECT ts FROM TimeSale ts WHERE ts.status = :status")
-    Page<TimeSale> findAllByStatus(TimeSaleStatus status, Pageable pageable);
-    
-    @Query("SELECT ts FROM TimeSale ts " +
-           "WHERE ts.startAt <= :now AND ts.endAt > :now " +
-           "AND ts.status = :status")
-    List<TimeSale> findAllByStatusAndBetweenStartAtAndEndAt(
-            TimeSaleStatus status, LocalDateTime now);
-    
     @Query("SELECT ts FROM TimeSale ts WHERE ts.startAt <= :now AND ts.endAt > :now AND ts.status = :status")
     Page<TimeSale> findAllByStartAtBeforeAndEndAtAfterAndStatus(
             @Param("now") LocalDateTime now,
